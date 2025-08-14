@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+   <name>LAPS Integration</name>
+   <key>lapsglpi</key>
+   <state>stable</state>
+   <logo>https://raw.githubusercontent.com/rafaelcavalheri/laps-glpi/main/pics/laps.png</logo>
+   <description>
+      <short>
+         <en>LAPS (Local Administrator Password Solution) integration for GLPI</en>
+         <pt_BR>Integração LAPS (Local Administrator Password Solution) para GLPI</pt_BR>
+      </short>
+      <long>
+         <en>This plugin provides integration between GLPI and LAPS (Local Administrator Password Solution), allowing administrators to view and manage local administrator passwords directly from GLPI interface.</en>
+         <pt_BR>Este plugin fornece integração entre GLPI e LAPS (Local Administrator Password Solution), permitindo que administradores visualizem e gerenciem senhas de administrador local diretamente da interface do GLPI.</pt_BR>
+      </long>
+   </description>
+   <homepage>https://github.com/rafaelcavalheri/laps-glpi</homepage>
+   <download>https://github.com/rafaelcavalheri/laps-glpi/releases</download>
+   <issues>https://github.com/rafaelcavalheri/laps-glpi/issues</issues>
+   <readme>https://raw.githubusercontent.com/rafaelcavalheri/laps-glpi/main/README.md</readme>
+   <authors>
+      <author>Rafael Cavalheri</author>
+   </authors>
+   <versions>
+      <version>
+         <num>1.0.0</num>
+         <compatibility>9.5.0</compatibility>
+         <compatibility>10.0.0</compatibility>
+         <compatibility>10.1.0</compatibility>
+      </version>
+   </versions>
+   <langs>
+      <lang>en_GB</lang>
+      <lang>pt_BR</lang>
+   </langs>
+   <license>GPL v2+</license>
+   <tags>
+      <en>
+         <tag>laps</tag>
+         <tag>password</tag>
+         <tag>administrator</tag>
+         <tag>security</tag>
+         <tag>integration</tag>
+      </en>
+      <pt_BR>
+         <tag>laps</tag>
+         <tag>senha</tag>
+         <tag>administrador</tag>
+         <tag>segurança</tag>
+         <tag>integração</tag>
+      </pt_BR>
+   </tags>
+   <screenshots>
+      <screenshot>https://raw.githubusercontent.com/rafaelcavalheri/laps-glpi/main/screenshots/config.png</screenshot>
+      <screenshot>https://raw.githubusercontent.com/rafaelcavalheri/laps-glpi/main/screenshots/computer.png</screenshot>
+   </screenshots>
+</root>

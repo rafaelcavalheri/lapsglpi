@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+   <name>LAPS</name>
+   <key>lapsglpi</key>
+   <state>stable</state>
+   <logo>https://raw.githubusercontent.com/pluginsGLPI/laps/main/pics/laps.png</logo>
+   <description>
+      <short>
+         <en>Local Administrator Password Solution (LAPS) integration for GLPI</en>
+         <pt_BR>Integração do Local Administrator Password Solution (LAPS) para GLPI</pt_BR>
+      </short>
+      <long>
+         <en>This plugin allows GLPI to retrieve and display local administrator passwords managed by Microsoft LAPS (Local Administrator Password Solution). It provides secure access to administrator passwords for computers in your Active Directory environment.</en>
+         <pt_BR>Este plugin permite ao GLPI recuperar e exibir senhas de administrador local gerenciadas pelo Microsoft LAPS (Local Administrator Password Solution). Ele fornece acesso seguro às senhas de administrador para computadores em seu ambiente Active Directory.</pt_BR>
+      </long>
+   </description>
+   <homepage>https://github.com/pluginsGLPI/laps</homepage>
+   <download>https://github.com/pluginsGLPI/laps/releases</download>
+   <issues>https://github.com/pluginsGLPI/laps/issues</issues>
+   <readme>https://github.com/pluginsGLPI/laps/blob/main/README.md</readme>
+   <authors>
+      <author>Rafael Cavalheri</author>
+   </authors>
+   <versions>
+      <version>
+         <num>2.0.0</num>
+         <compatibility>9.5.0</compatibility>
+         <compatibility>10.0.0</compatibility>
+         <compatibility>10.1.0</compatibility>
+         <download_url>https://github.com/pluginsGLPI/laps/releases/download/2.0.0/glpi-laps-2.0.0.tar.bz2</download_url>
+      </version>
+   </versions>
+   <langs>
+      <lang>en_GB</lang>
+      <lang>pt_BR</lang>
+   </langs>
+   <license>GPL v2+</license>
+   <tags>
+      <en>
+         <tag>LAPS</tag>
+         <tag>Password</tag>
+         <tag>Security</tag>
+         <tag>Active Directory</tag>
+         <tag>Administrator</tag>
+      </en>
+      <pt_BR>
+         <tag>LAPS</tag>
+         <tag>Senha</tag>
+         <tag>Segurança</tag>
+         <tag>Active Directory</tag>
+         <tag>Administrador</tag>
+      </pt_BR>
+   </tags>
+   <screenshots>
+      <screenshot>https://raw.githubusercontent.com/pluginsGLPI/laps/main/pics/screenshot1.png</screenshot>
+      <screenshot>https://raw.githubusercontent.com/pluginsGLPI/laps/main/pics/screenshot2.png</screenshot>
+   </screenshots>
+</root>

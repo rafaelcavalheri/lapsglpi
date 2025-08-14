@@ -1,0 +1,138 @@
+# LAPS Plugin for GLPI - Portuguese (Brazil) Translation
+# Copyright (C) 2024-2025 Rafael Cavalheri and contributors.
+# This file is distributed under the same license as the LAPS plugin.
+# Rafael Cavalheri <rafael.cavalheri@example.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: LAPS 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-14 10:00+0000\n"
+"PO-Revision-Date: 2024-08-14 10:00+0000\n"
+"Last-Translator: Rafael Cavalheri <rafael.cavalheri@example.com>\n"
+"Language-Team: Portuguese (Brazil)\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: setup.php
+msgid "LAPS Password"
+msgstr "Senha LAPS"
+
+#: setup.php
+msgid "LAPS Passwords"
+msgstr "Senhas LAPS"
+
+#: src/Config.php
+msgid "LAPS Configuration"
+msgstr "Configuração LAPS"
+
+#: src/Config.php
+msgid "LAPS Server URL"
+msgstr "URL do Servidor LAPS"
+
+#: src/Config.php
+msgid "API Key"
+msgstr "Chave da API"
+
+#: src/Config.php
+msgid "Connection Timeout (seconds)"
+msgstr "Timeout de Conexão (segundos)"
+
+#: src/Config.php
+msgid "Cache Duration (minutes)"
+msgstr "Duração do Cache (minutos)"
+
+#: src/Config.php
+msgid "Enable LAPS Plugin"
+msgstr "Ativar Plugin LAPS"
+
+#: src/Config.php
+msgid "Test Connection"
+msgstr "Testar Conexão"
+
+#: src/Config.php
+msgid "Save Configuration"
+msgstr "Salvar Configuração"
+
+#: src/Config.php
+msgid "Configuration saved successfully!"
+msgstr "Configuração salva com sucesso!"
+
+#: src/Config.php
+msgid "Error saving configuration!"
+msgstr "Erro ao salvar configuração!"
+
+#: src/Config.php
+msgid "Connection test successful!"
+msgstr "Teste de conexão bem-sucedido!"
+
+#: src/Config.php
+msgid "Connection test failed: %s"
+msgstr "Teste de conexão falhou: %s"
+
+#: src/Computer.php
+msgid "Administrator Password"
+msgstr "Senha do Administrador"
+
+#: src/Computer.php
+msgid "Expiration Date"
+msgstr "Data de Expiração"
+
+#: src/Computer.php
+msgid "Last Update"
+msgstr "Última Atualização"
+
+#: src/Computer.php
+msgid "Show Password"
+msgstr "Mostrar Senha"
+
+#: src/Computer.php
+msgid "Hide Password"
+msgstr "Ocultar Senha"
+
+#: src/Computer.php
+msgid "Copy Password"
+msgstr "Copiar Senha"
+
+#: src/Computer.php
+msgid "Password copied to clipboard!"
+msgstr "Senha copiada para a área de transferência!"
+
+#: src/Computer.php
+msgid "No LAPS password found for this computer."
+msgstr "Nenhuma senha LAPS encontrada para este computador."
+
+#: src/Computer.php
+msgid "LAPS plugin is not configured or disabled."
+msgstr "Plugin LAPS não está configurado ou está desabilitado."
+
+#: src/Computer.php
+msgid "Error retrieving LAPS password: %s"
+msgstr "Erro ao recuperar senha LAPS: %s"
+
+#: src/Computer.php
+msgid "LAPS password viewed"
+msgstr "Senha LAPS visualizada"
+
+#: src/Computer.php
+msgid "LAPS password copied"
+msgstr "Senha LAPS copiada"
+
+#: install/Install.php
+msgid "Installing LAPS plugin"
+msgstr "Instalando plugin LAPS"
+
+#: install/Install.php
+msgid "Upgrading LAPS plugin from %s"
+msgstr "Atualizando plugin LAPS da versão %s"
+
+#: hook.php
+msgid "LAPS plugin installation failed"
+msgstr "Falha na instalação do plugin LAPS"
+
+#: hook.php
+msgid "LAPS plugin upgrade failed"
+msgstr "Falha na atualização do plugin LAPS"
