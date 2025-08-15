@@ -35,20 +35,28 @@ function plugin_init_lapsglpi()
     
     // Check if plugin is active
     if (!class_exists('Plugin') || !Plugin::isPluginActive('lapsglpi')) {
-        return;
+        return false;
     }
     
-    // Register autoloader
-    spl_autoload_register('plugin_lapsglpi_autoload');
-    
-    // Register classes
-    plugin_lapsglpi_registerClasses();
-    
-    // Setup hooks
-    plugin_lapsglpi_setupHooks();
-    
-    // Add CSS and JS
-    plugin_lapsglpi_addAssets();
+    try {
+        // Register autoloader
+        spl_autoload_register('plugin_lapsglpi_autoload');
+        
+        // Register classes
+        plugin_lapsglpi_registerClasses();
+        
+        // Setup hooks
+        plugin_lapsglpi_setupHooks();
+        
+        // Add CSS and JS
+        plugin_lapsglpi_addAssets();
+    } catch (Exception $e) {
+        // Log error but don't break GLPI
+        if (function_exists('Toolbox::logError')) {
+            Toolbox::logError('LAPS Plugin Init Error: ' . $e->getMessage());
+        }
+        return false;
+    }
 }
 
 /**
@@ -132,10 +140,19 @@ function plugin_lapsglpi_getFriendlyName(): string
 function plugin_lapsglpi_autoload($classname)
 {
     if (strpos($classname, 'PluginLaps') === 0) {
-        $filename = LAPSGLPI_PLUGIN_DIR . '/inc/' . strtolower(str_replace('PluginLaps', '', $classname)) . '.class.php';
-        if (file_exists($filename)) {
-            include_once $filename;
-            return true;
+        $class_file = strtolower(str_replace('PluginLaps', '', $classname));
+        $filename = LAPSGLPI_PLUGIN_DIR . '/inc/' . $class_file . '.class.php';
+        
+        if (file_exists($filename) && is_readable($filename)) {
+            try {
+                include_once $filename;
+                return true;
+            } catch (Exception $e) {
+                if (function_exists('Toolbox::logError')) {
+                    Toolbox::logError('LAPS Plugin Autoload Error for ' . $classname . ': ' . $e->getMessage());
+                }
+                return false;
+            }
         }
     }
     return false;

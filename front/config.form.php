@@ -34,6 +34,10 @@ if (isset($_GET['debug'])) {
 
 Html::header(__('LAPS Configuration', 'laps'), $_SERVER['PHP_SELF'], 'config', 'PluginLapsConfig');
 
+// Incluir arquivos CSS e JS do plugin no início
+echo "<link rel='stylesheet' type='text/css' href='" . $CFG_GLPI['root_doc'] . "/plugins/lapsglpi/css/laps.css'>";
+echo "<script type='text/javascript' src='" . $CFG_GLPI['root_doc'] . "/plugins/lapsglpi/js/laps.js'></script>";
+
 // Debug: tentar criar instância da classe
 if (isset($_GET['debug'])) {
     echo "<p>Attempting to create PluginLapsConfig instance...</p>";
@@ -217,9 +221,14 @@ echo "</div>";
 
 echo "</div>";
 
-// Incluir arquivos CSS e JS do plugin
-echo "<link rel='stylesheet' type='text/css' href='" . $CFG_GLPI['root_doc'] . "/plugins/lapsglpi/css/laps.css'>";
-echo "<script type='text/javascript' src='" . $CFG_GLPI['root_doc'] . "/plugins/lapsglpi/js/laps.js'></script>";
+// Inicializar o plugin LAPS quando a página carregar
+echo "<script type='text/javascript'>";
+echo "document.addEventListener('DOMContentLoaded', function() {";
+echo "    if (typeof LAPS !== 'undefined') {";
+echo "        LAPS.init();";
+echo "    }";
+echo "});";
+echo "</script>";
 
 Html::footer();
 ?>

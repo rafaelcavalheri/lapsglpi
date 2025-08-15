@@ -14,9 +14,6 @@ if (!defined('GLPI_ROOT')) {
     die("Sorry. You can't access this file directly");
 }
 
-// Register autoloader for installation process
-spl_autoload_register('plugin_lapsglpi_autoload');
-
 /**
  * Plugin install process
  *
@@ -169,7 +166,8 @@ function plugin_lapsglpi_getAddSearchOptions(string $itemtype): array
             'datatype'      => 'datetime',
             'massiveaction' => false,
             'joinparams'    => [
-                'jointype' => 'LEFT JOIN'
+                'jointype' => 'LEFT JOIN',
+                'condition' => 'AND NEWTABLE.computers_id = TABLE.id'
             ]
         ];
         
@@ -180,7 +178,8 @@ function plugin_lapsglpi_getAddSearchOptions(string $itemtype): array
             'datatype'      => 'datetime',
             'massiveaction' => false,
             'joinparams'    => [
-                'jointype' => 'LEFT JOIN'
+                'jointype' => 'LEFT JOIN',
+                'condition' => 'AND NEWTABLE.computers_id = TABLE.id'
             ]
         ];
     }

@@ -52,12 +52,13 @@ class PluginLapsComputer extends CommonGLPI {
             return false;
         }
         
-        $computer_id = $computer->getID();
-        $computer_name = $computer->fields['name'];
-        
-        // Verificar se o plugin está ativo
-        $config = new PluginLapsConfig();
-        $settings = $config->getConfig();
+        try {
+            $computer_id = $computer->getID();
+            $computer_name = $computer->fields['name'] ?? 'Unknown';
+            
+            // Verificar se o plugin está ativo
+            $config = new PluginLapsConfig();
+            $settings = $config->getConfig();
         
         if (!$settings['is_active']) {
             echo "<div class='center'>";
@@ -116,6 +117,21 @@ class PluginLapsComputer extends CommonGLPI {
          echo "<script type='text/javascript' src='" . $CFG_GLPI['root_doc'] . "/plugins/lapsglpi/js/laps.js'></script>";
           
           return true;
+          
+        } catch (Exception $e) {
+            echo "<div class='center'>";
+            echo "<table class='tab_cadre_fixe'>";
+            echo "<tr class='headerRow'><th>" . __('LAPS Integration', 'laps') . "</th></tr>";
+            echo "<tr class='tab_bg_1'><td class='center'>" . __('Error loading LAPS information', 'laps') . "</td></tr>";
+            echo "</table>";
+            echo "</div>";
+            
+            if (function_exists('Toolbox::logError')) {
+                Toolbox::logError('LAPS Plugin showForComputer Error: ' . $e->getMessage());
+            }
+            
+            return false;
+        }
     }
     
     /**

@@ -46,7 +46,7 @@ class PluginLapsglpiInstall
         if (!$DB->tableExists('glpi_plugin_laps_passwords')) {
             $query = "CREATE TABLE `glpi_plugin_laps_passwords` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
-                `computers_id` int(11) NOT NULL,
+                `computers_id` int(10) unsigned NOT NULL,
                 `password_hash` varchar(255) DEFAULT NULL,
                 `expiration_date` datetime DEFAULT NULL,
                 `last_updated` datetime DEFAULT NULL,

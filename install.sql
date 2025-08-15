@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `glpi_plugin_laps_configs` (
 -- Tabela de cache de senhas LAPS
 CREATE TABLE IF NOT EXISTS `glpi_plugin_laps_passwords` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `computers_id` int(11) NOT NULL,
+  `computers_id` int(10) unsigned NOT NULL,
   `computer_name` varchar(255) NOT NULL,
   `admin_password` text,
   `password_expiry` datetime DEFAULT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `glpi_plugin_laps_passwords` (
 -- Tabela de logs de atividades
 CREATE TABLE IF NOT EXISTS `glpi_plugin_laps_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `computers_id` int(11) NOT NULL,
+  `computers_id` int(10) unsigned NOT NULL,
   `computer_name` varchar(255) NOT NULL,
   `action` varchar(100) NOT NULL,
   `user_id` int(11) NOT NULL,

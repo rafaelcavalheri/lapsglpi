@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # Banco de dados MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: lapsglpi-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: glpi
+      MYSQL_USER: glpi
+      MYSQL_PASSWORD: glpipassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - lapsglpi-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # GLPI com plugin LAPS
+  glpi:
+    build: .
+    container_name: lapsglpi-web
+    environment:
+      DB_HOST: mysql
+      DB_NAME: glpi
+      DB_USER: glpi
+      DB_PASSWORD: glpipassword
+    ports:
+      - "8080:80"
+    volumes:
+      - glpi_files:/var/www/html/glpi/files
+      - glpi_config:/var/www/html/glpi/config
+      - ./:/var/www/html/glpi/plugins/lapsglpi:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - lapsglpi-network
+
+  # Servidor LAPS simulado (para testes)
+  laps-server:
+    image: php:8.1-apache
+    container_name: lapsglpi-laps-server
+    volumes:
+      - ./test-laps-server:/var/www/html
+    ports:
+      - "8081:80"
+    networks:
+      - lapsglpi-network
+    command: >
+      bash -c "
+        echo '<?php
+        header(\"Content-Type: application/json\");
+        
+        // Simular API do servidor LAPS
+        \$action = \$_POST[\"action\"] ?? \$_GET[\"action\"] ?? \"\";
+        \$api_key = \$_POST[\"api_key\"] ?? \$_GET[\"api_key\"] ?? \$_SERVER[\"HTTP_X_API_KEY\"] ?? \"\";
+        
+        // Verificar API key
+        if (\$api_key !== \"5deeb8a3-e591-4bd4-8bfb-f9d8b117844c\") {
+            http_response_code(401);
+            echo json_encode([\"error\" => \"Invalid API key\"]);
+            exit;
+        }
+        
+        switch (\$action) {
+            case \"status\":
+                echo json_encode([
+                    \"success\" => true,
+                    \"version\" => \"1.0.0\",
+                    \"status\" => \"running\"
+                ]);
+                break;
+                
+            case \"get_password\":
+                \$computer = \$_POST[\"computer\"] ?? \$_GET[\"computer\"] ?? \"\";
+                if (empty(\$computer)) {
+                    echo json_encode([\"error\" => \"Computer name required\"]);
+                    break;
+                }
+                
+                // Simular senha LAPS
+                echo json_encode([
+                    \"success\" => true,
+                    \"password\" => \"TestPassword123!\",
+                    \"expiration_timestamp\" => date(\"Y-m-d H:i:s\", strtotime(\"+30 days\")),
+                    \"computer\" => \$computer
+                ]);
+                break;
+                
+            default:
+                echo json_encode([\"error\" => \"Unknown action\"]);
+        }
+        ?>' > /var/www/html/api.php &&
+        apache2-foreground
+      "
+
+volumes:
+  mysql_data:
+  glpi_files:
+  glpi_config:
+
+networks:
+  lapsglpi-network:
+    driver: bridge
