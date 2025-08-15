@@ -160,7 +160,7 @@ This project follows:
 
 ## Changelog
 
-### Version 2.0.0
+### Version 1.0.8
 - Complete refactoring with modern PHP practices
 - PSR-4 autoloading and namespaces (manual implementation)
 - Improved security with encrypted API keys
