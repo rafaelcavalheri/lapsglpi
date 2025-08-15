@@ -816,9 +816,12 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+.connection-warning {
     padding: 10px;
     border-radius: 4px;
     margin-top: 10px;
+    color: #ffc107;
 }
 
 /* Estilos para loading */
@@ -1068,6 +1071,10 @@
 
 .connection-error {
     color: #dc3545 !important;
+}
+
+.connection-warning {
+    color: #ffc107 !important;
 }
 
 .connection-warning {

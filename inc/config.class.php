@@ -67,17 +67,18 @@ class PluginLapsConfig extends CommonDBTM {
         
         echo "<tr class='tab_bg_1'>";
         echo "<td>" . __('LAPS Server URL', 'laps') . "</td>";
-        echo "<td><input type='text' name='laps_server_url' value='" . Html::cleanInputText($config['laps_server_url'] ?? '') . "' size='50' placeholder='https://laps.mogimirim.sp.gov.br'></td>";
+        echo "<td><input type='text' name='laps_server_url' value='" . Html::cleanInputText($config['laps_server_url'] ?? '') . "' size='50' placeholder='https://your-laps-server.example.com/api'></td>";
         echo "</tr>";
         
         echo "<tr class='tab_bg_1'>";
-        echo "<td>" . __('API Key', 'laps') . "</td>";
-        $apiKeyValue = !empty($config['laps_api_key']) ? '••••••••••••••••' : '';
-        echo "<td><input type='password' name='laps_api_key' value='" . $apiKeyValue . "' size='50' placeholder='Digite a chave da API do servidor LAPS'></td>";
+        echo "<td>" . __("API Key", "laps") . "</td>";
+        $apiKeyValue = $config['laps_api_key'] ?? '';
+        $keyStatus = !empty($config['laps_api_key']) ? ' <small style="color: green;">(Configurada)</small>' : ' <small style="color: red;">(Não configurada)</small>';
+        echo "<td><input type='text' name='laps_api_key' value='" . Html::cleanInputText($apiKeyValue) . "' size='50' placeholder='Digite a chave da API do servidor LAPS'>" . $keyStatus . "</td>";
         echo "</tr>";
         
         echo "<tr class='tab_bg_1'>";
-        echo "<td colspan='2'><small>" . __('Use the API key generated in the LAPS server. Default key: 5deeb8a3-e591-4bd4-8bfb-f9d8b117844c', 'laps') . "</small></td>";
+        echo "<td colspan='2'><small>" . __('Use the API key generated in the LAPS server. Replace with your actual API key.', 'laps') . "</small></td>";
         echo "</tr>";
         
         echo "<tr class='tab_bg_1'>";
@@ -142,11 +143,11 @@ class PluginLapsConfig extends CommonDBTM {
         // Retornar configuração padrão se não existir
         return [
             'id' => 0,
-            'laps_server_url' => 'https://laps.mogimirim.sp.gov.br/api.php',
-            'laps_api_key' => '5deeb8a3-e591-4bd4-8bfb-f9d8b117844c',
+            'laps_server_url' => defined('LAPS_DEFAULT_SERVER_URL') ? LAPS_DEFAULT_SERVER_URL : 'https://your-laps-server.example.com/api',
+            'laps_api_key' => defined('LAPS_DEFAULT_API_KEY') ? LAPS_DEFAULT_API_KEY : 'your-api-key-here',
             'connection_timeout' => 30,
             'cache_duration' => 300,
-            'is_active' => 1
+            'is_active' => 0
         ];
     }
     
@@ -158,60 +159,75 @@ class PluginLapsConfig extends CommonDBTM {
             return ['success' => false, 'message' => __('LAPS Server URL and API Key are required', 'laps')];
         }
         
-        $url = rtrim($config['laps_server_url'], '/') . '/api.php';
+        // Construir URL - tentar diferentes endpoints comuns
+        $baseUrl = rtrim($config['laps_server_url'], '/');
         
-        // Dados para testar a API
-        $postData = [
-            'action' => 'status',
-            'api_key' => $config['laps_api_key']
+        // Lista de endpoints comuns para teste
+        $testEndpoints = [
+            $baseUrl . '/test?api_key=' . urlencode($config['laps_api_key']),
+            $baseUrl . '/status?api_key=' . urlencode($config['laps_api_key']),
+            $baseUrl . '/health?api_key=' . urlencode($config['laps_api_key']),
+            $baseUrl . '?action=test&api_key=' . urlencode($config['laps_api_key']),
+            $baseUrl . '?action=status&api_key=' . urlencode($config['laps_api_key'])
         ];
         
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, intval($config['connection_timeout'] ?? 10));
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Accept: application/json',
-            'User-Agent: GLPI-LAPS-Plugin/1.0',
-            'X-API-Key: ' . $config['laps_api_key']
-        ]);
+        $lastError = '';
         
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-        
-        if ($error) {
-            return ['success' => false, 'message' => sprintf(__('Connection error: %s', 'laps'), $error)];
+        // Tentar cada endpoint até encontrar um que funcione
+        foreach ($testEndpoints as $url) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, intval($config['connection_timeout'] ?? 10));
+            curl_setopt($ch, CURLOPT_POST, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Accept: application/json',
+                'User-Agent: GLPI-LAPS-Plugin/1.0',
+                'X-API-Key: ' . $config['laps_api_key']
+            ]);
+            
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+            
+            if ($error) {
+                $lastError = sprintf(__('Connection error: %s', 'laps'), $error);
+                continue;
+            }
+            
+            if ($httpCode === 401) {
+                return ['success' => false, 'message' => __('Invalid API Key', 'laps')];
+            }
+            
+            if ($httpCode === 200) {
+                // Tentar decodificar JSON
+                $data = json_decode($response, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    // Resposta JSON válida
+                    if (isset($data['error'])) {
+                        return ['success' => false, 'message' => $data['error']];
+                    }
+                    
+                    $message = __('Connection successful', 'laps');
+                    if (isset($data['version'])) {
+                        $message .= ' (LAPS v' . $data['version'] . ')';
+                    }
+                    
+                    return ['success' => true, 'message' => $message, 'data' => $data, 'endpoint' => $url];
+                } else {
+                    // Resposta não é JSON, mas HTTP 200 - considerar sucesso
+                    return ['success' => true, 'message' => __('Connection successful', 'laps') . ' (Non-JSON response)', 'endpoint' => $url];
+                }
+            }
+            
+            $lastError = sprintf(__('HTTP error: %d', 'laps'), $httpCode);
         }
         
-        if ($httpCode === 401) {
-            return ['success' => false, 'message' => __('Invalid API Key', 'laps')];
-        }
-        
-        if ($httpCode !== 200) {
-            return ['success' => false, 'message' => sprintf(__('HTTP error: %d', 'laps'), $httpCode)];
-        }
-        
-        $data = json_decode($response, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return ['success' => false, 'message' => __('Invalid JSON response', 'laps')];
-        }
-        
-        if (isset($data['error'])) {
-            return ['success' => false, 'message' => $data['error']];
-        }
-        
-        $message = __('Connection successful', 'laps');
-        if (isset($data['version'])) {
-            $message .= ' (LAPS v' . $data['version'] . ')';
-        }
-        
-        return ['success' => true, 'message' => $message, 'data' => $data];
+        // Se chegou aqui, nenhum endpoint funcionou
+        return ['success' => false, 'message' => $lastError ?: __('All endpoints failed', 'laps')];
     }
     
     /**

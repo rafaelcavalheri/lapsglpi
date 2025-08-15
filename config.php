@@ -4,9 +4,9 @@
  * Plugin configuration file
  */
 
-// LAPS server settings
-define('LAPS_SERVER_URL', 'https://laps.mogimirim.sp.gov.br/');
-define('LAPS_API_KEY', 'glpi-integration-key-2024'); // New UUID key generated
+// LAPS server settings - Default values (can be overridden in plugin configuration)
+define('LAPS_DEFAULT_SERVER_URL', 'https://laps.mogimirim.sp.gov.br/');
+define('LAPS_DEFAULT_API_KEY', 'glpi-integration-key-2024'); // Replace with your actual API key
 
 // Connection settings
 define('LAPS_CONNECTION_TIMEOUT', 30); // Timeout in seconds

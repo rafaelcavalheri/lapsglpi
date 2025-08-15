@@ -529,8 +529,25 @@ LAPS.testConnectionAjax = function() {
     
     // Fazer requisição AJAX
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', window.location.href, true);
+    // Usar endpoint específico para AJAX - URL absoluta baseada na localização atual
+    var baseUrl = window.location.protocol + '//' + window.location.host;
+    var currentPath = window.location.pathname;
+    var glpiRoot = '';
+    
+    // Detectar raiz do GLPI baseado na URL atual
+    if (currentPath.includes('/plugins/')) {
+        glpiRoot = baseUrl + currentPath.split('/plugins/')[0];
+    } else if (currentPath.includes('/front/')) {
+        glpiRoot = baseUrl + currentPath.split('/front/')[0];
+    } else {
+        glpiRoot = baseUrl + '/glpi';
+    }
+    
+    var ajaxUrl = glpiRoot + '/plugins/lapsglpi/ajax/simple_test_connection.php';
+    xhr.open('POST', ajaxUrl, true);
+    xhr.withCredentials = true; // Incluir cookies de sessão
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); // Identificar como requisição AJAX
     
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
@@ -541,23 +558,54 @@ LAPS.testConnectionAjax = function() {
                 try {
                     var response = JSON.parse(xhr.responseText);
                     if (response.success) {
-                        resultElement.innerHTML = '<span class="connection-success">✓ ' + response.message + '</span>';
+                        var message = '✓ ' + response.message;
+                        if (response.data && response.data.version) {
+                            message += '<br><small>Server Version: ' + response.data.version + '</small>';
+                        }
+                        if (response.data && response.data.status) {
+                            message += '<br><small>Status: ' + response.data.status + '</small>';
+                        }
+                        resultElement.innerHTML = '<span class="connection-success">' + message + '</span>';
                     } else {
                         resultElement.innerHTML = '<span class="connection-error">✗ ' + response.message + '</span>';
                     }
                 } catch (e) {
                     console.log('Response is not JSON:', xhr.responseText);
-                    // Se não for JSON, procurar por mensagens na resposta HTML
-                    if (xhr.responseText.includes('Connection successful')) {
+                    console.log('Parse error:', e);
+                    
+                    // Verificar se a resposta contém HTML de erro do GLPI
+                    if (xhr.responseText.includes('Fatal error') || xhr.responseText.includes('Parse error')) {
+                        resultElement.innerHTML = '<span class="connection-error">✗ Server configuration error. Check GLPI logs.</span>';
+                    } else if (xhr.responseText.includes('Connection successful')) {
                         resultElement.innerHTML = '<span class="connection-success">✓ Connection successful</span>';
                     } else if (xhr.responseText.includes('Connection error')) {
                         resultElement.innerHTML = '<span class="connection-error">✗ Connection error</span>';
                     } else if (xhr.responseText.includes('Invalid API Key')) {
                         resultElement.innerHTML = '<span class="connection-error">✗ Invalid API Key</span>';
+                    } else if (xhr.responseText.includes('HTTP error')) {
+                        var httpMatch = xhr.responseText.match(/HTTP error: (\d+)/);
+                        var httpCode = httpMatch ? httpMatch[1] : 'unknown';
+                        resultElement.innerHTML = '<span class="connection-error">✗ HTTP Error ' + httpCode + '</span>';
+                    } else if (xhr.responseText.includes('Invalid JSON response')) {
+                        resultElement.innerHTML = '<span class="connection-error">✗ Invalid server response</span>';
+                    } else if (xhr.responseText.includes('LAPS Server URL and API Key are required')) {
+                        resultElement.innerHTML = '<span class="connection-error">✗ Server URL and API Key are required</span>';
+                    } else if (xhr.responseText.trim() === '') {
+                        resultElement.innerHTML = '<span class="connection-error">✗ Empty response from server. Check server URL and connectivity.</span>';
                     } else {
-                        resultElement.innerHTML = '<span class="connection-warning">? Test completed - check page for results</span>';
+                        // Tentar extrair mensagem de erro mais específica
+                        var errorMatch = xhr.responseText.match(/<span class="[^"]*error[^"]*">([^<]+)<\/span>/);
+                        if (errorMatch) {
+                            resultElement.innerHTML = '<span class="connection-error">✗ ' + errorMatch[1] + '</span>';
+                        } else {
+                            // Mostrar uma prévia da resposta para debug
+                            var preview = xhr.responseText.substring(0, 100).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            resultElement.innerHTML = '<span class="connection-warning">⚠ Unexpected response format.<br><small>Response preview: ' + preview + '...</small><br><small>Check server configuration and GLPI logs.</small></span>';
+                        }
                     }
                 }
+            } else if (xhr.status === 0) {
+                resultElement.innerHTML = '<span class="connection-error">✗ Network error. Check server URL and connectivity.</span>';
             } else {
                 resultElement.innerHTML = '<span class="connection-error">✗ Request failed (HTTP ' + xhr.status + ')</span>';
             }
@@ -565,9 +613,9 @@ LAPS.testConnectionAjax = function() {
     };
     
     // Enviar dados
-    var postData = 'test_connection_ajax=1&laps_server_url=' + encodeURIComponent(serverUrl) + 
-                   '&laps_api_key=' + encodeURIComponent(apiKey) + 
-                   '&connection_timeout=' + encodeURIComponent(timeout);
+    var postData = 'server_url=' + encodeURIComponent(serverUrl) + 
+                   '&api_key=' + encodeURIComponent(apiKey) + 
+                   '&timeout=' + encodeURIComponent(timeout);
     
     xhr.send(postData);
 }

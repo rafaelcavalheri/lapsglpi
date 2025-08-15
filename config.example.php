@@ -12,7 +12,7 @@
 // Configurações do servidor LAPS
 $laps_config = [
     // URL do servidor LAPS (obrigatório)
-    'laps_server_url' => 'https://laps.mogimirim.sp.gov.br/api.php',
+    'laps_server_url' => 'https://your-laps-server.example.com/api',
     
     // Chave da API do servidor LAPS (obrigatório)
     // Esta chave deve ser gerada no servidor LAPS
@@ -86,7 +86,7 @@ $environment_configs = [
     ],
     
     'production' => [
-        'laps_server_url' => 'https://laps.mogimirim.sp.gov.br/api.php',
+        'laps_server_url' => 'https://your-laps-server.example.com/api',
         'laps_api_key' => 'glpi-laps-integration-2025',
         'connection_timeout' => 30,
         'cache_duration' => 300,

@@ -4,7 +4,42 @@
  * Página de configuração do plugin
  */
 
-// Tentar incluir o GLPI com diferentes caminhos
+// Verificar se é uma requisição AJAX de teste de conexão
+$isAjaxTest = isset($_POST['test_connection_ajax']);
+
+// Se for uma requisição AJAX, processar imediatamente sem inicializar o GLPI completamente
+if ($isAjaxTest) {
+    // Incluir apenas o mínimo necessário
+    if (file_exists('../../../inc/includes.php')) {
+        include ('../../../inc/includes.php');
+    } elseif (file_exists('/var/www/html/glpi/inc/includes.php')) {
+        include ('/var/www/html/glpi/inc/includes.php');
+    } else {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'GLPI includes.php not found']);
+        exit;
+    }
+    
+    // Carregar a classe do plugin
+    if (!class_exists('PluginLapsConfig')) {
+        include_once(dirname(__DIR__) . '/inc/config.class.php');
+    }
+    
+    // Processar teste de conexão AJAX
+    header('Content-Type: application/json');
+    
+    $config = [];
+    $config['laps_server_url'] = $_POST['laps_server_url'] ?? '';
+    $config['laps_api_key'] = $_POST['laps_api_key'] ?? '';
+    $config['connection_timeout'] = $_POST['connection_timeout'] ?? 30;
+    
+    $result = PluginLapsConfig::testConnection($config);
+    
+    echo json_encode($result);
+    exit;
+}
+
+// Para requisições normais, incluir o GLPI normalmente
 if (file_exists('../../../inc/includes.php')) {
     include ('../../../inc/includes.php');
 } elseif (file_exists('/var/www/html/glpi/inc/includes.php')) {
@@ -13,19 +48,41 @@ if (file_exists('../../../inc/includes.php')) {
     die('Erro: Não foi possível encontrar o arquivo includes.php do GLPI');
 }
 
+// Importar classes e funções do GLPI
+use Glpi\Application\View\TemplateRenderer;
+
 // Verificar se as classes do plugin estão carregadas
 if (!class_exists('PluginLapsConfig')) {
     // Tentar carregar manualmente
     include_once(dirname(__DIR__) . '/inc/config.class.php');
 }
 
-// Comentado temporariamente para permitir acesso
-// if (!Session::haveRight('config', UPDATE)) {
-//     Html::displayRightError();
-// }
+// Declarações para o Intelephense
+if (false) {
+    /**
+     * @param string $msgid
+     * @param string $domain
+     * @return string
+     */
+    function __($msgid, $domain = 'glpi') { return ''; }
+    
+    class Html {
+        public static function header($title, $url = '', $sector = "none", $item = "", $option = "") {}
+        public static function footer($keepDB = false) {}
+        public static function convDateTime($datetime) { return ''; }
+    }
+}
 
-// Comentado temporariamente para permitir acesso
-// Session::checkRight('config', UPDATE);
+// Para requisições AJAX de teste, pular verificações de permissão
+if (!$isAjaxTest) {
+    // Comentado temporariamente para permitir acesso
+    // if (!Session::haveRight('config', UPDATE)) {
+    //     Html::displayRightError();
+    // }
+    
+    // Comentado temporariamente para permitir acesso
+    // Session::checkRight('config', UPDATE);
+}
 
 // Criar instância da classe
 try {
@@ -108,20 +165,7 @@ if (isset($_POST['update']) || isset($_POST['submit'])) {
     exit;
 }
 
-// Testar conexão via AJAX
-if (isset($_POST['test_connection_ajax'])) {
-    header('Content-Type: application/json');
-    
-    $config = [];
-    $config['laps_server_url'] = $_POST['laps_server_url'] ?? '';
-    $config['laps_api_key'] = $_POST['laps_api_key'] ?? '';
-    $config['connection_timeout'] = $_POST['connection_timeout'] ?? 30;
-    
-    $result = PluginLapsConfig::testConnection($config);
-    
-    echo json_encode($result);
-    exit;
-}
+// Seção de teste AJAX removida - processada no início do arquivo
 
 // Testar conexão
 if (isset($_POST['test_connection'])) {
@@ -198,9 +242,21 @@ echo "<tr class='headerRow'><th colspan='2'>" . __('Statistics', 'laps') . "</th
 
 // Contar computadores com senhas LAPS
 global $DB;
-$query = "SELECT COUNT(*) as total FROM glpi_plugin_laps_passwords";
-$result = $DB->query($query);
-$total = $DB->fetchAssoc($result)['total'];
+
+// Verificar se a tabela existe antes de fazer a consulta
+$table_exists = $DB->tableExists('glpi_plugin_laps_passwords');
+
+if ($table_exists) {
+    $query = "SELECT COUNT(*) as total FROM glpi_plugin_laps_passwords";
+    $result = $DB->query($query);
+    if ($result) {
+        $total = $DB->fetchAssoc($result)['total'];
+    } else {
+        $total = 0;
+    }
+} else {
+    $total = 0;
+}
 
 echo "<tr class='tab_bg_1'>";
 echo "<td><strong>" . __('Computers with LAPS passwords', 'laps') . ":</strong></td>";
@@ -208,9 +264,17 @@ echo "<td>" . $total . "</td>";
 echo "</tr>";
 
 // Contar sincronizações bem-sucedidas
-$query = "SELECT COUNT(*) as success FROM glpi_plugin_laps_passwords WHERE sync_status = 'success'";
-$result = $DB->query($query);
-$success = $DB->fetchAssoc($result)['success'];
+if ($table_exists) {
+    $query = "SELECT COUNT(*) as success FROM glpi_plugin_laps_passwords WHERE sync_status = 'success'";
+    $result = $DB->query($query);
+    if ($result) {
+        $success = $DB->fetchAssoc($result)['success'];
+    } else {
+        $success = 0;
+    }
+} else {
+    $success = 0;
+}
 
 echo "<tr class='tab_bg_1'>";
 echo "<td><strong>" . __('Successful synchronizations', 'laps') . ":</strong></td>";
@@ -218,9 +282,17 @@ echo "<td>" . $success . "</td>";
 echo "</tr>";
 
 // Contar erros
-$query = "SELECT COUNT(*) as errors FROM glpi_plugin_laps_passwords WHERE sync_status = 'error'";
-$result = $DB->query($query);
-$errors = $DB->fetchAssoc($result)['errors'];
+if ($table_exists) {
+    $query = "SELECT COUNT(*) as errors FROM glpi_plugin_laps_passwords WHERE sync_status = 'error'";
+    $result = $DB->query($query);
+    if ($result) {
+        $errors = $DB->fetchAssoc($result)['errors'];
+    } else {
+        $errors = 0;
+    }
+} else {
+    $errors = 0;
+}
 
 echo "<tr class='tab_bg_1'>";
 echo "<td><strong>" . __('Synchronization errors', 'laps') . ":</strong></td>";
@@ -228,9 +300,17 @@ echo "<td><span style='color: red;'>" . $errors . "</span></td>";
 echo "</tr>";
 
 // Última sincronização
-$query = "SELECT MAX(last_sync) as last_sync FROM glpi_plugin_laps_passwords";
-$result = $DB->query($query);
-$lastSync = $DB->fetchAssoc($result)['last_sync'];
+if ($table_exists) {
+    $query = "SELECT MAX(last_sync) as last_sync FROM glpi_plugin_laps_passwords";
+    $result = $DB->query($query);
+    if ($result) {
+        $lastSync = $DB->fetchAssoc($result)['last_sync'];
+    } else {
+        $lastSync = null;
+    }
+} else {
+    $lastSync = null;
+}
 
 echo "<tr class='tab_bg_1'>";
 echo "<td><strong>" . __('Last synchronization', 'laps') . ":</strong></td>";

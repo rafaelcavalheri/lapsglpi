@@ -143,8 +143,8 @@ class PluginLapsglpiInstall
         global $DB;
         
         $config = [
-            'laps_server_url' => 'https://laps.mogimirim.sp.gov.br/api.php',
-            'laps_api_key' => Toolbox::encrypt('5deeb8a3-e591-4bd4-8bfb-f9d8b117844c', GLPIKEY),
+            'laps_server_url' => 'https://your-laps-server.example.com/api',
+            'laps_api_key' => Toolbox::encrypt('your-api-key-here', GLPIKEY),
             'connection_timeout' => 30,
             'cache_duration' => 300,
             'is_active' => 1

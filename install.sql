@@ -58,11 +58,11 @@ INSERT INTO `glpi_plugin_laps_configs` (
   `is_active`,
   `date_creation`
 ) VALUES (
-  'https://laps.mogimirim.sp.gov.br/api.php',
-  '5deeb8a3-e591-4bd4-8bfb-f9d8b117844c',
+  'https://your-laps-server.example.com/api',
+  'your-api-key-here',
   30,
   300,
-  1,
+  0,
   NOW()
 ) ON DUPLICATE KEY UPDATE
   `date_mod` = NOW();
